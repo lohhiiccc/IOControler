@@ -1,6 +1,7 @@
 from Xlib import display, X, XK
 from enum import Enum
 import time
+from screeninfo import get_monitors
 
 class Action(Enum):
     KEY_STROK = 1
@@ -16,6 +17,8 @@ class Controller:
     def __init__(self):
         self.d = display.Display()
         self.root = self.d.screen().root
+        self.monitors = get_monitors()
+
 
     def key_stroke(self, key_name):
         keysym = XK.string_to_keysym(key_name)
@@ -92,3 +95,8 @@ class Controller:
         """
         self.d.xtest_fake_input(X.ButtonRelease, button)
         self.d.sync()
+
+    def get_screen_resolution(self):
+        for m in self.monitors:
+            if (m.is_primary):
+                return m.width, m.height
