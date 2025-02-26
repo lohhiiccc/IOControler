@@ -23,27 +23,26 @@ class Controller:
         self.s = self.d.screen()
         self.root = self.s.root
 
-
-    def key_stroke(self, key_name):
+    def key_stroke(self, key_name: str):
         keysym = XK.string_to_keysym(key_name)
         keycode = self.d.keysym_to_keycode(keysym)
         self.d.xtest_fake_input(X.KeyPress, keycode)
         self.d.xtest_fake_input(X.KeyRelease, keycode)
         self.d.sync()
 
-    def key_press(self, key_name):
+    def key_press(self, key_name: str):
         keysym = XK.string_to_keysym(key_name)
         keycode = self.d.keysym_to_keycode(keysym)
         self.d.xtest_fake_input(X.KeyPress, keycode)
         self.d.sync()
     
-    def key_release(self, key_name):
+    def key_release(self, key_name: str):
         keysym = XK.string_to_keysym(key_name)
         keycode = self.d.keysym_to_keycode(keysym)
         self.d.xtest_fake_input(X.KeyRelease, keycode)
         self.d.sync()
 
-    def shortcut(self, keys):
+    def shortcut(self, keys: list):
         """
         Simulates a keyboard shortcut by pressing all keys in order and then releasing them in reverse order.
         :param keys: List of key names as strings, e.g., ["Control_L", "C"]
@@ -68,7 +67,7 @@ class Controller:
             self.d.xtest_fake_input(X.KeyRelease, keycode)
         self.d.sync()
 
-    def mouse_move(self, x, y):
+    def mouse_move(self, x: int, y: int):
         """
         Moves the mouse pointer to the specified (x, y) screen coordinates using the root window's warp_pointer.
         """
