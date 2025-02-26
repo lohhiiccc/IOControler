@@ -1,7 +1,6 @@
 from Xlib import display, X, XK
 from enum import Enum
 import time
-from screeninfo import get_monitors
 
 class Action(Enum):
     KEY_STROK = 1
@@ -13,11 +12,16 @@ class Action(Enum):
     MOUSE_PRESS = 7
     MOUSE_RELEASE = 8
 
+class MouseButtons(Enum):
+    LEFT = 1
+    MIDDLE = 2
+    RIGHT = 3
+
 class Controller:
     def __init__(self):
         self.d = display.Display()
-        self.root = self.d.screen().root
-        self.monitors = get_monitors()
+        self.s = self.d.screen()
+        self.root = self.s.root
 
 
     def key_stroke(self, key_name):
@@ -71,7 +75,7 @@ class Controller:
         self.root.warp_pointer(x, y)
         self.d.sync()
 
-    def mouse_click(self, button=1):
+    def mouse_click(self, button: int = 1):
         """
         Simulates a mouse click by sending a button press and release.
         :param button: Mouse button number (1 for left, 2 for middle, 3 for right)
@@ -82,21 +86,37 @@ class Controller:
         self.d.xtest_fake_input(X.ButtonRelease, button)
         self.d.sync()
 
-    def mouse_press(self, button=1):
+    def mouse_click(self, button: MouseButtons = MouseButtons.LEFT):
+        self.d.xtest_fake_input(X.ButtonPress, button.value)
+        self.d.sync()
+        time.sleep(0.05)  # Short delay to mimic a real click
+        self.d.xtest_fake_input(X.ButtonRelease, button.value)
+        self.d.sync()
+
+    def mouse_press(self, button: int = 1):
         """
         Simulates pressing (without releasing) a mouse button.
         """
         self.d.xtest_fake_input(X.ButtonPress, button)
         self.d.sync()
 
-    def mouse_release(self, button=1):
+    def mouse_press(self, button: MouseButtons = MouseButtons.LEFT):
+        self.d.xtest_fake_input(X.ButtonPress, button.value)
+        self.d.sync()
+
+    def mouse_release(self, button: int = 1):
         """
         Simulates releasing a previously pressed mouse button.
         """
         self.d.xtest_fake_input(X.ButtonRelease, button)
         self.d.sync()
 
+    def mouse_release(self, button: MouseButtons = MouseButtons.LEFT):
+        self.d.xtest_fake_input(X.ButtonRelease, button.value)
+        self.d.sync()
+
     def get_screen_resolution(self):
-        for m in self.monitors:
-            if (m.is_primary):
-                return m.width, m.height
+        """
+        Returns the screen resolution as a tuple (width, height).
+        """
+        return self.s.width_in_pixels, self.s.height_in_pixels
