@@ -3,7 +3,8 @@ from enum import Enum
 import time
 
 class Action(Enum):
-    KEY_STROK = 1
+    WAIT = 0
+    KEY_STROKE = 1
     KEY_PRESS = 2
     KEY_RELEASE = 3
     KEY_SHORTCUT = 4
@@ -22,6 +23,12 @@ class Controller:
         self.d = display.Display()
         self.s = self.d.screen()
         self.root = self.s.root
+
+    def get_screen_resolution(self):
+        """
+        Returns the screen resolution as a tuple (width, height).
+        """
+        return self.s.width_in_pixels, self.s.height_in_pixels
 
     def key_stroke(self, key_name: str):
         keysym = XK.string_to_keysym(key_name)
@@ -114,8 +121,28 @@ class Controller:
         self.d.xtest_fake_input(X.ButtonRelease, button.value)
         self.d.sync()
 
-    def get_screen_resolution(self):
-        """
-        Returns the screen resolution as a tuple (width, height).
-        """
-        return self.s.width_in_pixels, self.s.height_in_pixels
+    def execute_action(self, action: Action, *args):
+        if action == Action.WAIT:
+            time.sleep(args[0])
+        elif action == Action.KEY_STROKE:
+            self.key_stroke(args[0])
+        elif action == Action.KEY_PRESS:
+            self.key_press(args[0])
+        elif action == Action.KEY_RELEASE:
+            self.key_release(args[0])
+        elif action == Action.KEY_SHORTCUT:
+            self.shortcut(args[0])
+        elif action == Action.MOUSE_MOVE:
+            self.mouse_move(args[0], args[1])
+        elif action == Action.MOUSE_CLICK:
+            self.mouse_click(args[0])
+        elif action == Action.MOUSE_PRESS:
+            self.mouse_press(args[0])
+        elif action == Action.MOUSE_RELEASE:
+            self.mouse_release(args[0])
+        else:
+            raise Exception("Invalid action type.")
+        
+    def execute_actions(self, actions: list):
+        for action in actions:
+            self.execute_action(*action)
