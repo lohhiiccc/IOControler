@@ -1,7 +1,7 @@
 from Xlib import display, X, XK
 from enum import Enum
 import time
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 
 class Action(Enum):
     WAIT = 0
@@ -24,7 +24,7 @@ class Controller:
         self.d = display.Display()
         self.s = self.d.screen()
         self.root = self.s.root
-        self.macros: Dict[str, List[Tuple[Action, List]]] = {}
+        self.macros: Dict[str, List[Tuple[Action, Any]]] = {}
 
 
     def get_screen_resolution(self):
@@ -169,7 +169,7 @@ class Controller:
         self.add_macro(name, [])
 
     def add_action_to_macro(self, name: str, action: Action, *args):
-        self.macros[name].append((action, args))
+        self.macros[name].append((action, *args))
 
     def remove_action_from_macro(self, name: str, index: int):
         del self.macros[name][index]
