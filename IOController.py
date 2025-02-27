@@ -3,6 +3,7 @@ from Xlib.ext import randr, xfixes
 from enum import Enum
 import time
 from Xlib.xobject.cursor import Cursor
+from typing import List, Dict, Tuple, Any
 
 class Action(Enum):
     WAIT = 0
@@ -25,6 +26,8 @@ class Controller:
         self.d = display.Display()
         self.s = self.d.screen()
         self.root = self.s.root
+        self.macros: Dict[str, List[Tuple[Action, Any]]] = {}
+
 
 
     def get_screen_resolution(self):
@@ -176,7 +179,34 @@ class Controller:
         # Sync the display to apply changes
         self.d.sync()
 
-    # def cursor_recolor(self):
-        # self.cursor.recolor((65535, 0, 0), (0, 65535, 0))
 
-# todo: self.set_gamma(1, 1, 1) in destructor
+
+    def add_macro(self, name: str, actions: list):
+        self.macros[name] = actions
+
+    def run_macro(self, name: str):
+        self.execute_actions(self.macros[name])
+
+    def remove_macro(self, name: str):
+        del self.macros[name]
+    
+    def clear_macros(self):
+        self.macros.clear()
+    
+    def get_macros(self):
+        return self.macros
+    
+    def register_macro(self, name: str):
+        self.add_macro(name, [])
+
+    def add_action_to_macro(self, name: str, action: Action, *args):
+        self.macros[name].append((action, *args))
+
+    def remove_action_from_macro(self, name: str, index: int):
+        del self.macros[name][index]
+
+    def __del__(self):
+        self.set_gamma(1, 1, 1)
+        self.d.close()
+
+
