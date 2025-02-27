@@ -45,6 +45,11 @@ class OutlineWindow:
 		self.window.set_wm_protocols([self.WM_DELETE_WINDOW])
 		self.window.set_wm_hints(flags=Xutil.StateHint, initial_state=Xutil.NormalState)
 
+		atom_net_wm_state = self.d.intern_atom('_NET_WM_STATE')
+		atom_net_wm_state_fullscreen = self.d.intern_atom('_NET_WM_STATE_FULLSCREEN')
+		atom_net_wm_state_above = self.d.intern_atom('_NET_WM_STATE_ABOVE')
+		self.window.change_property(atom_net_wm_state, Xatom.ATOM, 32, [atom_net_wm_state_fullscreen, atom_net_wm_state_above])
+
 		# # Create an outer rectangle that will be the outer edge of the visible rectangle
 		outer_rect = self.window.create_pixmap(w, h, 1)
 		gc = outer_rect.create_gc(foreground=1, background=0)
@@ -67,22 +72,38 @@ class OutlineWindow:
 		self.window.shape_select_input(0)
 		self.window.map()
 
-		atom_net_wm_state = self.d.intern_atom('_NET_WM_STATE')
-		atom_net_wm_state_fullscreen = self.d.intern_atom('_NET_WM_STATE_FULLSCREEN')
-		atom_net_wm_state_above = self.d.intern_atom('_NET_WM_STATE_ABOVE')
-		self.window.change_property(atom_net_wm_state, Xatom.ATOM, 32, [atom_net_wm_state_fullscreen, atom_net_wm_state_above])
-
-		# # # Définir la transparence de la fenêtre
-		# opacity = int(0.5 * 0xFFFFFFFF)  # 0.5 pour 50% de transparence
-		# atom_net_wm_window_opacity = display.intern_atom('_NET_WM_WINDOW_OPACITY')
-		# self.window.change_property(atom_net_wm_window_opacity, Xatom.CARDINAL, 32, [opacity])
-
 		tmpgc = self.window.create_gc(foreground=self.screen.black_pixel, background=self.screen.white_pixel)
 		self.window.fill_rectangle(tmpgc, 50, 50, 10, 10)
 		tmpgc.free()
 
+		self.point_shape(shape.SO.Union, shape.SK.Bounding, 45, 45)
+		self.point_shape(shape.SO.Union, shape.SK.Bounding, 45, 46)
+		self.point_shape(shape.SO.Union, shape.SK.Bounding, 45, 47)
+		self.point_shape(shape.SO.Union, shape.SK.Bounding, 45, 48)
+		self.point_shape(shape.SO.Union, shape.SK.Bounding, 45, 49)
+		self.point_shape(shape.SO.Union, shape.SK.Bounding, 45, 50)
+
+		self.point_draw(45, 45, 0xffffff)
+		self.point_draw(45, 46, 0xffffff)
+		self.point_draw(45, 47, 0xffffff)
+	
 		# Apply changes
 		self.d.flush()
+
+	def point_shape(self, operation, destination_kind, x, y):
+		# Create a pixmap to draw the pixel
+		pm = self.window.create_pixmap(1, 1, 1)
+		pmgc = pm.create_gc(foreground=1, background=0)
+		pm.point(pmgc, 0, 0)
+		pmgc.free()
+
+		# Apply the pixel to the window
+		self.window.shape_mask(operation, destination_kind, x, y, pm)
+
+	def point_draw(self, x, y, color):
+		wgc = self.window.create_gc(foreground=color, background=self.screen.black_pixel)
+		self.window.point(wgc, x, y)
+		wgc.free()
 
 	# Main loop, handling events
 	def loop(self):
