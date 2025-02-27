@@ -174,5 +174,8 @@ class Controller:
     def remove_action_from_macro(self, name: str, index: int):
         del self.macros[name][index]
 
+    def clear_macro(self, name: str):
+        self.macros[name].clear()
+
     def __del__(self):
         self.d.close()
