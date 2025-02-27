@@ -1,4 +1,4 @@
-from Xlib import display, X, XK
+from Xlib import X, XK
 from Xlib.ext import randr, xfixes
 from enum import Enum
 import time
@@ -22,8 +22,8 @@ class MouseButtons(Enum):
     RIGHT = 3
 
 class Controller:
-    def __init__(self):
-        self.d = display.Display()
+    def __init__(self, display):
+        self.d = display
         self.s = self.d.screen()
         self.root = self.s.root
         self.macros: Dict[str, List[Tuple[Action, Any]]] = {}
