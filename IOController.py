@@ -1,6 +1,8 @@
 from Xlib import display, X, XK
+from Xlib.ext import randr, xfixes
 from enum import Enum
 import time
+from Xlib.xobject.cursor import Cursor
 
 class Action(Enum):
     WAIT = 0
@@ -23,6 +25,7 @@ class Controller:
         self.d = display.Display()
         self.s = self.d.screen()
         self.root = self.s.root
+
 
     def get_screen_resolution(self):
         """
@@ -146,3 +149,34 @@ class Controller:
     def execute_actions(self, actions: list):
         for action in actions:
             self.execute_action(*action)
+
+    def set_gamma(self, r: float, g: float, b: float):
+        """
+        Sets the gamma correction for the screen.
+        :param r: Red gamma value (float)
+        :param g: Green gamma value (float)
+        :param b: Blue gamma value (float)
+        """
+        # Get the default screen and root window
+        screen = self.s
+        root = self.root
+
+        # Get the resources (screen configuration)
+        resources = randr.get_screen_resources(root)
+        crtcs = resources.crtcs
+
+        # Set gamma for each CRTC (display controller)
+        for crtc in crtcs:
+            gamma_size = randr.get_crtc_gamma_size(self.d, crtc).size
+            red_gamma = [int((i / (gamma_size - 1)) ** r * 65535) for i in range(gamma_size)]
+            green_gamma = [int((i / (gamma_size - 1)) ** g * 65535) for i in range(gamma_size)]
+            blue_gamma = [int((i / (gamma_size - 1)) ** b * 65535) for i in range(gamma_size)]
+            randr.set_crtc_gamma(self.d, crtc, gamma_size, red_gamma, green_gamma, blue_gamma)
+
+        # Sync the display to apply changes
+        self.d.sync()
+
+    # def cursor_recolor(self):
+        # self.cursor.recolor((65535, 0, 0), (0, 65535, 0))
+
+# todo: self.set_gamma(1, 1, 1) in destructor
